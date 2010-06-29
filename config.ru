@@ -1,3 +1,3 @@
-require "#{File.dirname(__FILE__)}/lib/gem_template"
+require "#{File.dirname(__FILE__)}/lib/facehugger"
 
 run Application

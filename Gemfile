@@ -1,7 +1,6 @@
 source "http://rubygems.org"
 
 v = {
-  :active_wrapper => '=0.2.7',
   :bundler => '=1.0.0.beta.2',
   :cucumber => '=0.6.2',
   :haml => '=2.2.17',
@@ -14,12 +13,10 @@ v = {
 }
 
 group :console do
-  gem 'active_wrapper', v[:active_wrapper], :require => %w(active_wrapper)
   gem 'sinatra', v[:sinatra], :require => %w(sinatra/base)
 end
 
 group :gemspec do
-  gem 'active_wrapper', v[:active_wrapper], :require => %w(active_wrapper)
   gem 'bundler', v[:bundler]
   gem 'haml', v[:haml]
   gem 'lilypad', v[:lilypad]
@@ -34,7 +31,6 @@ group :gemspec_dev do
 end
 
 group :lib do
-  gem 'active_wrapper', v[:active_wrapper], :require => %w(active_wrapper)
   gem 'haml', v[:haml], :require => %w(haml sass)
   gem 'lilypad', v[:lilypad], :require => %w(lilypad)
   gem 'rack-flash', v[:rack_flash], :require => %w(rack-flash)
@@ -42,7 +38,6 @@ group :lib do
 end
 
 group :rake do
-  gem 'active_wrapper', v[:active_wrapper], :require => %w(active_wrapper/tasks)
   gem 'rake', v[:rake], :require => %w(rake rake/gempackagetask)
   gem 'rspec', v[:rspec], :require => %w(spec/rake/spectask)
 end

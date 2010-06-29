@@ -5,5 +5,5 @@ Application.class_eval do
   set :public, "#{root}/public"
   set :logging, true
   set :static, true
-  set :views, "#{root}/lib/gem_template/view"
+  set :views, "#{root}/lib/facehugger/view"
 end

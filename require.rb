@@ -25,22 +25,22 @@ Require do
       gem :sinatra
     end
     email 'mail@wintoni.us'
-    name 'gem_template'
+    name 'facehugger'
     homepage "http://github.com/winton/#{name}"
     summary ""
     version '0.1.0'
   end
   
-  bin { require 'lib/gem_template' }
+  bin { require 'lib/facehugger' }
   
   console do
     gem :active_wrapper
     gem :sinatra
     gem :active_wrapper
-    require 'lib/gem_template/boot/application'
-    require 'lib/gem_template/boot/sinatra'
-    require 'lib/gem_template/boot/active_wrapper'
-    require 'lib/gem_template/boot/model'
+    require 'lib/facehugger/boot/application'
+    require 'lib/facehugger/boot/sinatra'
+    require 'lib/facehugger/boot/active_wrapper'
+    require 'lib/facehugger/boot/model'
   end
   
   lib do
@@ -48,15 +48,15 @@ Require do
     gem :sinatra
     gem :active_wrapper
     gem :'rack-flash'
-    require 'lib/gem_template/boot/application'
-    require 'lib/gem_template/boot/sinatra'
-    require 'lib/gem_template/boot/session'
-    require 'lib/gem_template/boot/flash'
-    require 'lib/gem_template/boot/active_wrapper'
-    require 'lib/gem_template/boot/lilypad'
-    require 'lib/gem_template/boot/controller'
-    require 'lib/gem_template/boot/helper'
-    require 'lib/gem_template/boot/model'
+    require 'lib/facehugger/boot/application'
+    require 'lib/facehugger/boot/sinatra'
+    require 'lib/facehugger/boot/session'
+    require 'lib/facehugger/boot/flash'
+    require 'lib/facehugger/boot/active_wrapper'
+    require 'lib/facehugger/boot/lilypad'
+    require 'lib/facehugger/boot/controller'
+    require 'lib/facehugger/boot/helper'
+    require 'lib/facehugger/boot/model'
   end
   
   rakefile do
@@ -69,7 +69,7 @@ Require do
   spec_helper do
     gem :'rack-test'
     require 'require/spec_helper'
-    require 'lib/gem_template'
+    require 'lib/facehugger'
     require 'pp'
   end
 end

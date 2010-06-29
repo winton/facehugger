@@ -8,7 +8,7 @@ end
 
 SPEC = File.dirname(__FILE__)
 
-require "#{Bundler.root}/lib/gem_template"
+require "#{Bundler.root}/lib/facehugger"
 require 'pp'
 
 # For use with rspec textmate bundle

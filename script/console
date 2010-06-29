@@ -3,5 +3,5 @@
 require 'rubygems'
 require 'bundler'
 
-lib = File.expand_path(File.dirname(__FILE__) + "/../lib/gem_template")
+lib = File.expand_path(File.dirname(__FILE__) + "/../lib/facehugger")
 exec "irb -r #{lib}/boot/console"

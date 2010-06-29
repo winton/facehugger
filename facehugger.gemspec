@@ -2,19 +2,19 @@
 lib = File.expand_path('../lib/', __FILE__)
 $:.unshift lib unless $:.include?(lib)
 
-require 'gem_template/version'
+require 'facehugger/version'
 require 'rubygems'
 require 'bundler'
 
 Gem::Specification.new do |s|
-  s.name = "gem_template"
-  s.version = GemTemplate::VERSION
+  s.name = "facehugger"
+  s.version = Facehugger::VERSION
   s.platform = Gem::Platform::RUBY
   s.authors = ["Winton Welsh"]
   s.email = ["mail@wintoni.us"]
-  s.homepage = "http://github.com/winton/gem_template"
-  s.summary = ""
-  s.description = ""
+  s.homepage = "http://github.com/winton/facehugger"
+  s.summary = "Wraps the Facebook Javascript SDK in a warm, loving embrace"
+  s.description = "Makes the Facebook Javascript SDK simpler, elegant, and jQuery-ish"
 
   Bundler.definition.dependencies.each do |dep|
     if dep.groups.include?(:gemspec)
