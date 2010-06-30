@@ -1,9 +1,7 @@
 .DS_Store
 *.gem
 *.log
-config/database.yml
-config/deploy.rb
-config/mail.yml
+config/app_id.txt
 coverage
 log
 pkg

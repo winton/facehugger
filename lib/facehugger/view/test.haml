@@ -3,7 +3,10 @@
   %head
     = css 'qunit'
     = js 'jquery'
+    = js 'jquery.facehugger'
     = js 'qunit'
+    = js 'qunit.facehugger'
+    %script= "window.app_id = '#{@app_id}';"
   %body
     %h1{ :id => "qunit-header" } facehugger
     %h2{ :id => "qunit-banner" }
