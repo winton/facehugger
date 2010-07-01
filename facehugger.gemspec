@@ -13,8 +13,8 @@ Gem::Specification.new do |s|
   s.authors = ["Winton Welsh"]
   s.email = ["mail@wintoni.us"]
   s.homepage = "http://github.com/winton/facehugger"
-  s.summary = "Wraps the Facebook Javascript SDK in a warm, loving embrace"
-  s.description = "Makes the Facebook Javascript SDK simpler, elegant, and jQuery-ish"
+  s.summary = "Wraps the Facebook Javascript SDK in a warm, loving, jQuery-ish embrace"
+  s.description = "Provides $.fb, a simple to use interface to the Facebook Javascript SDK"
 
   Bundler.definition.dependencies.each do |dep|
     if dep.groups.include?(:gemspec)

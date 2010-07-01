@@ -22,8 +22,7 @@ jQuery.fb = new function() {
 		reset: reset,
 		status: status,
 		toJson: toJson,
-		unbind: unbind,
-		waitForInit: waitForInit
+		unbind: unbind
 	});
 	
 	bindPrivateEvents();
@@ -119,31 +118,31 @@ jQuery.fb = new function() {
 	}
 	
 	function fbAPI(path, method, data, fn) {
-		waitForInit(function() {
+		init(function() {
 			FB.api(path, method, data, fn);
 		});
 	}
 	
 	function fbEventSubscribe(e, fn) {
-		waitForInit(function() {
+		init(function() {
 			FB.Event.subscribe(e, fn);
 		});
 	}
 	
 	function fbGetLoginStatus(fn) {
-		waitForInit(function() {
+		init(function() {
 			FB.getLoginStatus(fn);
 		});
 	}
 	
 	function fbLogin(fn, options) {
-		waitForInit(function() {
+		init(function() {
 			FB.login(fn, options);
 		});
 	}
 	
 	function fbLogout(fn) {
-		waitForInit(function() {
+		init(function() {
 			FB.logout(fn);
 		});
 	}
@@ -152,19 +151,36 @@ jQuery.fb = new function() {
 		return eval('(' + (json || '{}') + ')');
 	}
 	
-	function init(options) {
-		fb_root = $('#fb-root');
-		init_options = options;
+	function init(options, fn) {
+		if (typeof options == 'function') {
+			fn = options;
+			options = null;
+		}
+			
+		if (options) {
+			options.appId = options.app_id || options.appId;
+			delete options.app_id;
+
+			fb_root = $('#fb-root');
+			init_options = options;
+
+			if (!fb_root.length)
+				fb_root = $('<div id="fb-root"/>').appendTo('body');
+
+			$('<script/>')
+				.attr({
+					async: true,
+					src: protocol + '//connect.facebook.net/en_US/all.js'
+				})
+				.appendTo(fb_root);
+		}
 		
-		if (!fb_root.length)
-			fb_root = $('<div id="fb-root"/>').appendTo('body');
-		
-		$('<script/>')
-			.attr({
-				async: true,
-				src: protocol + '//connect.facebook.net/en_US/all.js'
-			})
-			.appendTo(fb_root);
+		if (fn) {
+			if (window.FB)
+				fn();
+			else
+				private_events.one('init', fn);
+		}
 		
 		return me;
 	}
@@ -172,14 +188,18 @@ jQuery.fb = new function() {
 	function login() {
 		var args = $.makeArray(arguments);
 		var fn;
+		var options;
 		
 		if (typeof args[args.length-1] == 'function')
 			fn = args.pop();
 		
 		if (typeof args[0] == 'object')
-			args = $.makeArray(args[0]);
+			options = args[0];
 		
-		fbLogin(fn, { perms: args.join(',') });
+		else if (typeof args[0] == 'string')
+			options = { perms: args.join(',') };
+		
+		fbLogin(fn, options);
 		
 		return me;
 	}
@@ -212,7 +232,7 @@ jQuery.fb = new function() {
 		if (type && fn)
 			return bind('status_' + type, fn);
 		
-		else if (type) {
+		else if (typeof type == 'function') {
 			fn = type;
 			type = null;
 		}
@@ -255,15 +275,6 @@ jQuery.fb = new function() {
 	
 	function unbind(eventType, handler) {
 		events.unbind(eventType, handler);
-		return me;
-	}
-	
-	function waitForInit(fn) {
-		if (window.FB)
-			fn();
-		else
-			private_events.one('init', fn);
-		
 		return me;
 	}
 };

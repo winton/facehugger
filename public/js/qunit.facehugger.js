@@ -20,8 +20,7 @@ $(function() {
 	function resetFB(fn) {
 		$.fb
 			.reset()
-			.waitForInit(fn)
-			.init({ appId: window.app_id, status: true });
+			.init({ app_id: window.app_id, status: true }, fn);
 	}
 	
 	function wait(msg, fn) {
@@ -61,13 +60,13 @@ $(function() {
 		});
 	});
 	
-	module('waitForInit', { setup: $.fb.unbind });
+	module('init event', { setup: $.fb.unbind });
 	
-	test('should call waitForInit even after initialized', function() {
+	test('should call init event even after initialized', function() {
 		expect(1);
 		stop();
 		resetFB(function() {
-			$.fb.waitForInit(function() {
+			$.fb.init(function() {
 				start();
 				ok(true);
 			});
