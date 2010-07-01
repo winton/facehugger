@@ -5,31 +5,108 @@ jQuery.fb = new function() {
 	var fb_root;
 	var init_options;
 	var me = this;
+	var private_events = $('<div/>');
 	var protocol = document.location.protocol;
+	var url = "graph.facebook.com";
 	
 	$.extend(this, {
+		api: api,
 		bind: bind,
+		cachedAPI: cachedAPI,
+		cookie: cookie,
+		fromJson: fromJson,
 		init: init,
 		login: login,
 		logout: logout,
 		one: one,
+		reset: reset,
 		status: status,
+		toJson: toJson,
+		unbind: unbind,
 		waitForInit: waitForInit
 	});
 	
+	bindPrivateEvents();
+	
 	window.fbAsyncInit = function() {
 		FB.init(init_options);
-		
-		fbEventSubscribe('auth.statusChange', function(response) {
-			events.trigger('status_' + response.status, response);
-		});
-		
-		events.trigger('init');
+		private_events.trigger('init');
 	};
+	
+	function api(path, method, data, fn) {
+		if (!data) 
+			fbAPI(path, method);
+		else if (!fn)
+			fbAPI(path, method, data);
+		else
+			fbAPI(path, method, data, fn);
+		
+		return me;
+	}
 	
 	function bind(e, fn) {
 		events.bind(e, fn);
 		return me;
+	}
+	
+	function bindPrivateEvents() {
+		private_events
+			.unbind()
+			.one('init', function() {
+				fbEventSubscribe('auth.statusChange', function(response) {
+					if (response.status == 'notConnected')
+						response.status = 'not_connected';
+					events.trigger('status_' + response.status, response);
+				});
+			});
+	}
+	
+	function cachedAPI(key, path, method, data, fn) {
+		if (path == undefined)
+			return fromJson(cookie(key));
+		else
+			api(path, method, data, function(response) {
+				cookie(key, toJson(response));
+				fn(response);
+			});
+		
+		return me;
+	}
+	
+	function cookie(name, value) {
+		if (!name) return null;
+		if (typeof value != 'undefined') {
+			if (value === null)
+				document.cookie = [
+					name, '=', '; expires=-1; path=/'
+				].join('');
+			else
+				document.cookie = [
+					name, '=', encodeURIComponent(value), '; path=/'
+				].join('');
+		} else {
+			var cookie_value = null;
+			if (document.cookie && document.cookie != '') {
+				var cookies = document.cookie.split(';');
+				for (var i = 0; i < cookies.length; i++) {
+					var cookie = trim(cookies[i]);
+					if (cookie.substring(0, name.length + 1) == (name + '=')) {
+						cookie_value = decodeURIComponent(
+							cookie.substring(name.length + 1)
+						);
+						break;
+					}
+				}
+			}
+			return cookie_value;
+		}
+		return null;
+	}
+	
+	function fbAPI(path, method, data, fn) {
+		waitForInit(function() {
+			FB.api(path, method, data, fn);
+		});
 	}
 	
 	function fbEventSubscribe(e, fn) {
@@ -46,7 +123,6 @@ jQuery.fb = new function() {
 	
 	function fbLogin(fn, options) {
 		waitForInit(function() {
-			console.log(options);
 			FB.login(fn, options);
 		});
 	}
@@ -55,6 +131,10 @@ jQuery.fb = new function() {
 		waitForInit(function() {
 			FB.logout(fn);
 		});
+	}
+	
+	function fromJson(json) {
+		return eval('(' + (json || '{}') + ')');
 	}
 	
 	function init(options) {
@@ -98,6 +178,21 @@ jQuery.fb = new function() {
 		events.one(e, fn);
 	}
 	
+	function picture(id, type) {
+		if (type) // square, small, large
+			type = '?type=' + type;
+		else
+			type = '';
+		return protocol + "://" + url + "/" + id + "/picture" + type;
+	}
+	
+	function reset() {
+		$('#fb-root').remove();
+		delete window.FB;
+		bindPrivateEvents();
+		return me;
+	}
+	
 	function status(type, fn) {
 		if (type && fn)
 			return bind('status_' + type, fn);
@@ -112,11 +207,52 @@ jQuery.fb = new function() {
 		return me;
 	}
 	
+	function toJson(obj) {
+		var json = [];
+		if (obj.constructor == Object) {
+			json.push('{');
+			for (var name in obj) {
+				json.push('"' + name + '"');
+				json.push(':');
+				json.push(toJson(obj[name]));
+				json.push(',');
+			}
+			if (json[json.length - 1] == ',')
+				json.pop();
+			json.push('}');
+		} else if (obj.constructor == Array) {
+			json.push('[');
+			for(var i = 0, l = obj.length; i < l; i++) {
+				json.push(toJson(obj[i]));
+				json.push(',');
+			}
+			if (json[json.length - 1] == ',')
+				json.pop();
+			json.push(']');
+		} else if (typeof obj == 'string')
+			json.push('"' + obj + '"');
+		else if (typeof obj == 'number')
+			json.push(obj);
+		else
+			json.push(obj + '');
+		return json.join('');
+	}
+	
+	function trim(text) {
+		return (text || "")
+			.replace(/^(\s|\u00A0)+|(\s|\u00A0)+$/g, "");
+	}
+	
+	function unbind(eventType, handler) {
+		events.unbind(eventType, handler);
+		return me;
+	}
+	
 	function waitForInit(fn) {
 		if (window.FB)
 			fn();
 		else
-			events.one('init', fn);
+			private_events.one('init', fn);
 		
 		return me;
 	}

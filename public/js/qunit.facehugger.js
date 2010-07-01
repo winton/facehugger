@@ -2,10 +2,6 @@ $(function() {
 	
 	// Utility functions
 	
-	function initFB() {
-		$.fb.init({ appId: window.app_id, status: true });
-	}
-	
 	function loginFB(fn) {
 		logoutFB(function() {
 			$.fb.login(fn);
@@ -13,32 +9,48 @@ $(function() {
 	}
 	
 	function logoutFB(fn) {
-		$.fb.waitForInit(function() {
-			if (FB.getSession())
-				$.fb.logout(function() {
-					resetFB(fn);
-				});
-			else
-				fn();
-		});
-	}
-	
-	function removeFB() {
-		$('#fb-root').remove();
-		window.FB = null;
+		if (window.FB && FB.getSession())
+			$.fb.logout(function() {
+				resetFB(fn);
+			});
+		else
+			resetFB(fn);
 	}
 	
 	function resetFB(fn) {
-		removeFB();
-		initFB();
-		$.fb.waitForInit(function() {
-			fn();
-		});
+		$.fb
+			.reset()
+			.waitForInit(fn)
+			.init({ appId: window.app_id, status: true });
+	}
+	
+	function wait(msg, fn) {
+		var alert = $('<div id="alert"/>')
+			.html(msg + " ")
+			.css({
+				background: 'red',
+				color: 'white',
+				'font-family': $('h1').css('font-family'),
+				'font-weight': 'bold',
+				'margin-bottom': '8px',
+				padding: '8px'
+			})
+			.prependTo('body');
+		alert.append(
+			$('<a href="#"/>')
+				.html('Continue')
+				.css('color', 'yellow')
+				.click(function() {
+					alert.remove();
+					fn();
+					return false;
+				})
+		);
 	}
 	
 	// Tests
 	
-	module('init');
+	module('init', { setup: $.fb.unbind });
 	
 	test('should initialize', function() {
 		expect(1);
@@ -49,7 +61,7 @@ $(function() {
 		});
 	});
 	
-	module('waitForInit');
+	module('waitForInit', { setup: $.fb.unbind });
 	
 	test('should call waitForInit even after initialized', function() {
 		expect(1);
@@ -62,7 +74,7 @@ $(function() {
 		});
 	});
 	
-	module('login');
+	module('login', { setup: $.fb.unbind });
 	
 	test('should log the user in', function() {
 		expect(1);
@@ -84,7 +96,7 @@ $(function() {
 		});
 	});
 	
-	module('logout');
+	module('logout', { setup: $.fb.unbind });
 	
 	test('should log the user out', function() {
 		expect(1);
@@ -97,7 +109,7 @@ $(function() {
 		});
 	});
 	
-	module('status');
+	module('status without event', { setup: $.fb.unbind });
 	
 	test('should get the status', function() {
 		expect(1);
@@ -106,6 +118,155 @@ $(function() {
 			$.fb.status(function(response) {
 				start();
 				equals(response.status, 'connected');
+			});
+		});
+	});
+	
+	module('status with event', { setup: $.fb.unbind });
+	
+	test('should trigger the not_connected event', function() {
+		expect(1);
+		stop();
+		wait('Remove the dev app from your Facebook account now.', function() {
+			$.fb.status('not_connected', function(response) {
+				start();
+				ok(true);
+			});
+			resetFB(function() {
+				$.fb.status();
+			});
+		});
+	});
+	
+	test('should trigger the connected event', function() {
+		expect(1);
+		stop();
+		$.fb.status('connected', function() {
+			start();
+			ok(true);
+		});
+		loginFB();
+	});
+	
+	test('should trigger the unknown event', function() {
+		expect(1);
+		stop();
+		$.fb.status('unknown', function(response) {
+			start();
+			ok(true);
+		});
+		logoutFB(function() {
+			$.fb.status();
+		});
+	});
+	
+	module('api', { setup: $.fb.unbind });
+	
+	test('should query "/me" and respond with id and name', function() {
+		expect(2);
+		stop();
+		loginFB(function() {
+			$.fb.api('/me', function(response) {
+				start();
+				equals(typeof response.id, 'string');
+				equals(typeof response.name, 'string');
+			});
+		});
+	});
+	
+	module('api post', { setup: $.fb.unbind });
+	
+	test('should post a feed item', function() {
+		expect(1);
+		stop();
+		wait("This test will post a feed item to your account.", function() {
+			logoutFB(function() {
+				$.fb.login('publish_stream', function() {
+					var data = {
+						message: 'Message',
+						picture: 'http://blog.wintoni.us/images/winton.png',
+						link: 'http://wintoni.us',
+						name: 'Name',
+						caption: 'Caption',
+						description: 'Description'
+					};
+					$.fb.api('/me/feed', 'post', data, function(response) {
+						start();
+						equals(typeof response.id, 'string');
+					});
+				});
+			});
+		});
+	});
+	
+	module('api post via REST', { setup: $.fb.unbind });
+	
+	test('should post a feed item', function() {
+		expect(1);
+		stop();
+		wait("This test will post a feed item to your account.", function() {
+			logoutFB(function() {
+				$.fb.login('publish_stream', function() {
+					var params = {
+						method: 'stream.publish',
+						message: 'Message',
+						action_links: [
+							{
+								text: 'Action link',
+								href: 'http://wintoni.us'
+							}
+						],
+						attachment: {
+							name: 'Attachment name',
+							href: 'http://wintoni.us',
+							caption: 'Attachment caption',
+							description: 'Attachment description',
+							properties: {
+								'Attachment property': {
+									href: 'http://wintoni.us',
+									text: 'Attachment property text'
+								}
+							},
+							media: [
+								{
+									type: 'image',
+									src: 'http://blog.wintoni.us/images/winton.png',
+									href: 'http://wintoni.us'
+								}
+							]
+						}
+					};
+					$.fb.api(params, function(response) {
+						start();
+						equals(typeof response, 'string');
+					});
+				});
+			});
+		});
+	});
+	
+	module('cached API', {
+		setup: function() {
+			$.fb.cookie('me', null);
+			$.fb.unbind();
+		},
+		teardown: function() {
+			$.fb.cookie('me', null);
+		}
+	});
+	
+	test('should cache "/me"', function() {
+		expect(4);
+		stop();
+		loginFB(function() {
+			$.fb.cachedAPI('me', '/me', function(response) {
+				start();
+				equals(typeof response.id, 'string');
+				equals(typeof response.name, 'string');
+				
+				var cached = $.fb.cachedAPI('me');
+				equals(typeof cached.id, 'string');
+				equals(typeof cached.name, 'string');
 			});
 		});
 	});
