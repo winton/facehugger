@@ -16,39 +16,43 @@ Usage
 
 $.fb.init({ app_id: 'YOUR APP ID', status: true }, function() {
   
-  // Status
-
-  $.fb.status(function(response) {
-    console.log(response);
-  });
-
-  $.fb.status('connected', function() { console.log('connected'); });
-  $.fb.status('not_connected', function() { console.log('not connected'); });
-  $.fb.status('unknown', function() { console.log('unknown'); });
-
-  $.fb.status();
-
-  // Login
+  $.fb
   
-  $.fb.login('publish_stream', function() {
-    
-    // API
-    
-    $.fb.api('/me', function(response) {
+    // Status
+
+    .status(function(response) {
       console.log(response);
+    })
+
+    .status('connected', function() { console.log('connected'); })
+    .status('not_connected', function() { console.log('not connected'); })
+    .status('unknown', function() { console.log('unknown'); })
+
+    .status()
+
+    // Login
+  
+    .login('publish_stream', function() {
+      
+      $.fb
+    
+        // API
+    
+        .api('/me', function(response) {
+          console.log(response);
+        })
+    
+        // Cached API
+    
+        .api('my_cookie', '/me', function(response) {
+          console.log(response);
+        })
+    
+        // Logout
+    
+        .logout(function() {
+          console.log('logged out');
+        });
     });
-    
-    // Cached API
-    
-    $.fb.api('my_cookie', '/me', function(response) {
-      console.log(response);
-    });
-    
-    // Logout
-    
-    $.fb.logout(function() {
-      console.log('logged out');
-    });
-  });
 });
 </pre>
