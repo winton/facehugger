@@ -104,7 +104,7 @@ jQuery.fb = new function() {
 			if (document.cookie && document.cookie != '') {
 				var cookies = document.cookie.split(';');
 				for (var i = 0; i < cookies.length; i++) {
-					var cookie = trim(cookies[i]);
+					var cookie = $.trim(cookies[i]);
 					if (cookie.substring(0, name.length + 1) == (name + '=')) {
 						cookie_value = decodeURIComponent(
 							cookie.substring(name.length + 1)
@@ -251,11 +251,6 @@ jQuery.fb = new function() {
 		else
 			json.push(obj + '');
 		return json.join('');
-	}
-	
-	function trim(text) {
-		return (text || "")
-			.replace(/^(\s|\u00A0)+|(\s|\u00A0)+$/g, "");
 	}
 	
 	function unbind(eventType, handler) {
