@@ -33,14 +33,8 @@ jQuery.fb = new function() {
 		private_events.trigger('init');
 	};
 	
-	function api(path, method, data, fn) {
-		if (!data) 
-			fbAPI(path, method);
-		else if (!fn)
-			fbAPI(path, method, data);
-		else
-			fbAPI(path, method, data, fn);
-		
+	function api() {
+		fbAPI.apply(this, compressArgs(arguments));
 		return me;
 	}
 	
@@ -64,13 +58,34 @@ jQuery.fb = new function() {
 	function cachedAPI(key, path, method, data, fn) {
 		if (path == undefined)
 			return fromJson(cookie(key));
-		else
-			api(path, method, data, function(response) {
+		else {
+			var args = compressArgs([ path, method, data, fn ]);
+			
+			if (typeof args[args.length-1] == 'function')
+				fn = args[args.length-1];
+			
+			var replacement_fn = function(response) {
 				cookie(key, toJson(response));
-				fn(response);
-			});
+				if (fn) fn(response);
+			};
+			
+			if (fn)
+				args[args.length-1] = replacement_fn;
+			else
+				args.push(replacement_fn);
+			
+			api.apply(this, args);
+		}
 		
 		return me;
+	}
+	
+	function compressArgs(args) {
+		args = $.makeArray(args);
+		
+		return $.grep(args, function(item) {
+			return (item != undefined);
+		});
 	}
 	
 	function cookie(name, value) {
