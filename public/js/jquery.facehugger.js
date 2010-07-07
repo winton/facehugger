@@ -33,8 +33,9 @@ jQuery.fb = new function() {
 	};
 	
 	function api() {
+		var args = compressArgs(arguments);
 		login(function() {
-			fbAPI.apply(this, compressArgs(arguments));
+			fbAPI.apply(this, args);
 		});
 		return me;
 	}
@@ -201,10 +202,15 @@ jQuery.fb = new function() {
 		else if (typeof args[0] == 'string')
 			options = { perms: args.join(',') };
 		
-		fbLogin(function(response) {
-			events.trigger('login');
-			if (fn) fn(response);
-		}, options);
+		status(function(response) {
+			if (response.status == 'connected')
+				fn(response);
+			else
+				fbLogin(function(response) {
+					events.trigger('login');
+					if (fn) fn(response);
+				}, options);
+		});
 		
 		return me;
 	}
