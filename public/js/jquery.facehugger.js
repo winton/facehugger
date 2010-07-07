@@ -33,7 +33,9 @@ jQuery.fb = new function() {
 	};
 	
 	function api() {
-		fbAPI.apply(this, compressArgs(arguments));
+		login(function() {
+			fbAPI.apply(this, compressArgs(arguments));
+		});
 		return me;
 	}
 	
@@ -199,13 +201,19 @@ jQuery.fb = new function() {
 		else if (typeof args[0] == 'string')
 			options = { perms: args.join(',') };
 		
-		fbLogin(fn, options);
+		fbLogin(function(response) {
+			events.trigger('login');
+			if (fn) fn(response);
+		}, options);
 		
 		return me;
 	}
 	
 	function logout(fn) {
-		fbLogout(fn);
+		fbLogout(function(response) {
+			events.trigger('logout');
+			if (fn) fn(response);
+		});
 		return me;
 	}
 	
@@ -237,7 +245,11 @@ jQuery.fb = new function() {
 			type = null;
 		}
 		
-		fbGetLoginStatus(fn);
+		fbGetLoginStatus(function(response) {
+			if (response.status == 'notConnected')
+				response.status = 'not_connected';
+			if (fn) fn(response);
+		});
 		
 		return me;
 	}
