@@ -44,7 +44,7 @@ $.fb.init({ app_id: 'YOUR APP ID', status: true }, function() {
     
         // Cached API
     
-        .api('my_cookie', '/me', function(response) {
+        .cachedAPI('/me', [ 'id', 'name' ], function(response) {
           console.log(response);
         })
     

@@ -246,11 +246,11 @@ $(function() {
 	
 	module('cached API', {
 		setup: function() {
-			$.fb.cookie('me', null);
+			$.fb.cookie('fb_me', null);
 			$.fb.unbind();
 		},
 		teardown: function() {
-			$.fb.cookie('me', null);
+			$.fb.cookie('fb_me', null);
 		}
 	});
 	
@@ -258,12 +258,12 @@ $(function() {
 		expect(4);
 		stop();
 		loginFB(function() {
-			$.fb.cachedAPI('me', '/me', function(response) {
+			$.fb.cachedAPI('/me', [ 'id', 'name' ], function(response) {
 				start();
 				equals(typeof response.id, 'string');
 				equals(typeof response.name, 'string');
 				
-				var cached = $.fb.cachedAPI('me');
+				var cached = $.fb.cachedAPI('/me');
 				equals(typeof cached.id, 'string');
 				equals(typeof cached.name, 'string');
 			});
