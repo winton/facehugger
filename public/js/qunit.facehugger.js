@@ -263,9 +263,10 @@ $(function() {
 				equals(typeof response.id, 'string');
 				equals(typeof response.name, 'string');
 				
-				var cached = $.fb.cachedAPI('/me');
-				equals(typeof cached.id, 'string');
-				equals(typeof cached.name, 'string');
+				$.fb.cachedAPI('/me', function() {
+					equals(typeof cached.id, 'string');
+					equals(typeof cached.name, 'string');
+				});
 			});
 		});
 	});

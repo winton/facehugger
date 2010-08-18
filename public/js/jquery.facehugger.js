@@ -60,19 +60,26 @@ jQuery.fb = new function() {
 						response.status = 'not_connected';
 					events.trigger('status_' + response.status, response);
 				});
+				FB.getLoginStatus(function(response) {
+					if (response.status == 'connected')
+						events.trigger('login');
+				});
 			});
 	}
 	
 	function cachedAPI(path, values, method, data, fn) {
 		var key = 'fb' + path.replace(/\W/g, '_');
-		if (values == undefined)
-			return fromJson(cookie(key));
+		var args = compressArgs([ path, values, method, data, fn ]);
+
+		if (typeof args[args.length-1] == 'function')
+			fn = args[args.length-1];
+			
+		if (values.constructor != Array)
+			values = this.cached_values;
+		
+		if (cookie(key))
+			fn(fromJson(cookie(key)));
 		else {
-			var args = compressArgs([ path, method, data, fn ]);
-			
-			if (typeof args[args.length-1] == 'function')
-				fn = args[args.length-1];
-			
 			var replacement_fn = function(response) {
 				var data = {};
 				$.each(values, function(i, item) {
